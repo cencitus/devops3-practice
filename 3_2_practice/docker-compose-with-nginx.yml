@@ -1,0 +1,33 @@
+services:
+  user-service:
+    build: ../user-service
+    ports:
+      - "3001:3001"
+    networks: [micro-net]
+
+  order-service:
+    build: ../order-service
+    ports:
+      - "3002:3002"
+    environment:
+      - USER_SERVICE_URL=http://user-service:3001
+    depends_on: [user-service]
+    networks: [micro-net]
+
+  api-gateway:
+    build: ../api-gateway
+    ports:
+      - "3000:3000"
+    depends_on: [user-service, order-service]
+    networks: [micro-net]
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "8080:80"
+    depends_on: [api-gateway]
+    networks: [micro-net]
+
+networks:
+  micro-net:
+    driver: bridge
